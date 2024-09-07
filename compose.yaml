@@ -1,0 +1,11 @@
+name: rentcost-papb
+
+services:
+  postgres:
+    image: postgres:16.3-alpine3.20
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rentcost
+      POSTGRES_DB: postgres
+    ports:
+      - 5434:5432
