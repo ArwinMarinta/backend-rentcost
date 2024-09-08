@@ -12,6 +12,7 @@ import { SizesService } from './sizes.service';
 import { CreateSizeDto } from './dto/create-size.dto';
 import { UpdateSizeDto } from './dto/update-size.dto';
 import { AuthGuard } from '../auths/auth.guard';
+import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
 
 @Controller('sizes')
 export class SizesController {
@@ -26,12 +27,24 @@ export class SizesController {
       return {
         message: 'Size created successfully',
       };
-    } catch (error) {}
+    } catch (error) {
+      createHttpException(error);
+    }
   }
 
+  @UseGuards(AuthGuard)
   @Get()
-  findAll() {
-    return this.sizesService.findAll();
+  async findAll() {
+    try {
+      const size = await this.sizesService.findAll();
+
+      return {
+        message: 'Get all size successfully',
+        data: size,
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
   }
 
   @Get(':id')
@@ -40,8 +53,16 @@ export class SizesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSizeDto: UpdateSizeDto) {
-    return this.sizesService.update(+id, updateSizeDto);
+  async update(@Param('id') id: string, @Body() updateSizeDto: UpdateSizeDto) {
+    try {
+      await this.sizesService.update(+id, updateSizeDto);
+
+      return {
+        message: 'Update size successfully',
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
   }
 
   @Delete(':id')

@@ -22,6 +22,4 @@ export class Auth {
   is_verified: boolean;
   @CreateDateColumn()
   created_at: Date;
-  namaLengkap: string;
-  noTelp: string;
 }

@@ -66,32 +66,34 @@ export class AuthsService {
       throw new ConflictException('Email already exists');
     }
 
-    const newAuth = await this.dataSource
-      .createQueryBuilder()
-      .insert()
-      .into(Auth)
-      .values({
-        email: createAuthDto.email,
-        password: await bcrypt.hash(createAuthDto.password, 10),
-        is_verified: false,
-      })
-      .execute();
+    await this.dataSource.transaction(async (user) => {
+      const newAuth = await user
+        .createQueryBuilder()
+        .insert()
+        .into(Auth)
+        .values({
+          email: createAuthDto.email,
+          password: await bcrypt.hash(createAuthDto.password, 10),
+          is_verified: false,
+        })
+        .execute();
 
-    await this.dataSource
-      .createQueryBuilder()
-      .insert()
-      .into(User)
-      .values({
-        username: createAuthDto.username,
-        phone_number: createAuthDto.phone_number,
-        location: createAuthDto.location,
-        identify_type: createAuthDto.identity_type,
-        identity_number: createAuthDto.identity_number,
-        bank_account: createAuthDto.bank_account,
-        image_url: createAuthDto.image_url,
-        auth: newAuth.identifiers[0].id,
-      })
-      .execute();
+      await this.dataSource
+        .createQueryBuilder()
+        .insert()
+        .into(User)
+        .values({
+          username: createAuthDto.username,
+          phone_number: createAuthDto.phone_number,
+          location: createAuthDto.location,
+          identify_type: createAuthDto.identity_type,
+          identity_number: createAuthDto.identity_number,
+          bank_account: createAuthDto.bank_account,
+          image_url: createAuthDto.image_url,
+          auth: newAuth.identifiers[0].id,
+        })
+        .execute();
+    });
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordRequestDto) {

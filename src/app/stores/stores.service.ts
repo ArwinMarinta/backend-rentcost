@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { DataSource } from 'typeorm';
@@ -18,8 +22,13 @@ export class StoresService {
       throw new NotFoundException('User not found or not authenticated');
     }
 
-    // const id = user.id;
+    const store = await this.dataSource
+      .getRepository(Store)
+      .findOne({ where: { store_name: createStoreDto.store_name } });
 
+    if (store) {
+      throw new ConflictException('Store name already exist');
+    }
     await this.dataSource
       .createQueryBuilder()
       .insert()

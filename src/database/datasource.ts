@@ -15,7 +15,7 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
   entities: ['dist/**/*.entity.js'],
   migrations: ['src/database/migrations/*{.ts,.js}'],
   migrationsTableName: 'migrations',
-  synchronize: false,
+  synchronize: true,
   logging: true,
 };
 

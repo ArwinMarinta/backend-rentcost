@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CategoriesModule } from './app/categories/categories.module';
 import { AuthsModule } from './app/auths/auths.module';
-import { OtpModule } from './app/otp/otp.module';
 import { UsersModule } from './app/users/users.module';
 import { SizesModule } from './app/sizes/sizes.module';
 import { StoresModule } from './app/stores/stores.module';
@@ -18,7 +17,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
     TypeOrmModule.forRoot(dataSourceOptions),
     CategoriesModule,
     AuthsModule,
-    OtpModule,
     UsersModule,
     SizesModule,
     StoresModule,

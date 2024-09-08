@@ -6,7 +6,8 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
+  ManyToMany,
+  JoinTable,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 @Entity()
@@ -20,7 +21,8 @@ export class Product {
   @ManyToOne(() => Category, (category) => category.product)
   category: Category;
 
-  @OneToMany(() => Size, (size) => size.product)
+  @ManyToMany(() => Size, (size) => size.product)
+  @JoinTable()
   size: Size;
 
   @Column()
@@ -43,6 +45,9 @@ export class Product {
 
   @Column({ default: 0 })
   discount: number;
+
+  @Column({ default: false })
+  available: boolean;
 
   @CreateDateColumn()
   created_at: Date;
