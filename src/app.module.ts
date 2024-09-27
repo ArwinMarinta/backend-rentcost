@@ -11,6 +11,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './database/datasource';
 import { ConfigModule } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { BannersModule } from './app/banners/banners.module';
+import { CartsModule } from './app/carts/carts.module';
+import { CartsItemModule } from './app/carts_item/carts_item.module';
+import { TransactionsModule } from './app/transactions/transactions.module';
+import { TransactionItemsModule } from './app/transaction_items/transaction_items.module';
+import { AddressModule } from './app/address/address.module';
+import { PaymentsModule } from './app/payments/payments.module';
 @Module({
   imports: [
     ConfigModule.forRoot({}),
@@ -32,6 +39,13 @@ import { MailerModule } from '@nestjs-modules/mailer';
         },
       },
     }),
+    BannersModule,
+    CartsModule,
+    CartsItemModule,
+    TransactionsModule,
+    TransactionItemsModule,
+    AddressModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
