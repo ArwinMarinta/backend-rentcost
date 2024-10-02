@@ -1,3 +1,4 @@
+import { CartsItem } from 'src/app/carts_item/entities/carts_item.entity';
 import { Category } from 'src/app/categories/entities/category.entity';
 import { Size } from 'src/app/sizes/entities/size.entity';
 import { Store } from 'src/app/stores/entities/store.entity';
@@ -25,6 +26,8 @@ export class Product {
   @JoinTable()
   size: Size;
 
+  @ManyToOne(() => CartsItem, (cartItem) => cartItem.product)
+  cartItem: CartsItem;
   @Column()
   product_name: string;
 
