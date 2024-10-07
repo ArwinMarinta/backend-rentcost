@@ -29,7 +29,7 @@ export class AddressController {
       await this.addressService.create(createAddressDto, req);
 
       return {
-        message: 'Address created successfully',
+        message: 'Successfully created address',
       };
     } catch (error) {
       createHttpException(error);

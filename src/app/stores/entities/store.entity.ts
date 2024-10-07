@@ -4,15 +4,17 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 @Entity()
 export class Store {
   @PrimaryGeneratedColumn()
   id: number;
-  @ManyToOne(() => User, (user) => user.store)
+  @OneToOne(() => User)
+  @JoinColumn()
   user: User;
   @OneToMany(() => Product, (product) => product.store)
   product: Product;

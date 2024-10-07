@@ -21,15 +21,14 @@ export class User {
   @JoinColumn()
   auth: Auth;
 
-  @OneToOne(() => Cart)
-  @JoinColumn()
+  @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
 
   @OneToMany(() => Transaction, (transaction) => transaction.user)
   transaction: Transaction;
 
-  @OneToMany(() => Store, (store) => store.user)
-  store: Store[];
+  @OneToOne(() => Store, (store) => store.user)
+  store: Store;
 
   @OneToMany(() => Address, (address) => address.user)
   address: Address[];

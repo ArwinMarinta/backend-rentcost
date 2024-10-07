@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Cart } from 'src/app/carts/entities/cart.entity';
 import { Product } from 'src/app/products/entities/product.entity';
 
@@ -16,7 +10,7 @@ export class CartsItem {
   @ManyToOne(() => Cart, (cart) => cart.cartItem)
   cart: Cart;
 
-  @OneToMany(() => Product, (product) => product.cartItem)
+  @ManyToOne(() => Product, (product) => product.cartItem)
   product: Product;
 
   @Column()

@@ -81,9 +81,6 @@ export class AuthsService {
 
         const newAuthId = newAuth.identifiers[0].id;
 
-        console.log(newAuthId);
-        console.log(newAuth);
-
         await manager
           .createQueryBuilder()
           .insert()

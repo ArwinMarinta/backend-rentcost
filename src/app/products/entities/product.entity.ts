@@ -7,9 +7,8 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  ManyToMany,
-  JoinTable,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
 @Entity()
 export class Product {
@@ -22,12 +21,12 @@ export class Product {
   @ManyToOne(() => Category, (category) => category.product)
   category: Category;
 
-  @ManyToMany(() => Size, (size) => size.product)
-  @JoinTable()
-  size: Size;
+  @OneToMany(() => Size, (size) => size.product)
+  size: Size[];
 
-  @ManyToOne(() => CartsItem, (cartItem) => cartItem.product)
-  cartItem: CartsItem;
+  @OneToMany(() => CartsItem, (cartItem) => cartItem.product)
+  cartItem: CartsItem[];
+
   @Column()
   product_name: string;
 

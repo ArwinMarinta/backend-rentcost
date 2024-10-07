@@ -36,9 +36,8 @@ export class ProductsService {
 
   async findAll(): Promise<Product[]> {
     const products = await this.dataSource.getRepository(Product).find({
-      select: {
-        id: true,
-        product_name: true,
+      where: {
+        available: true,
       },
     });
 

@@ -3,7 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 @Entity()
@@ -11,8 +11,8 @@ export class Size {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToMany(() => Product, (product) => product.size)
-  product: Product[];
+  @ManyToOne(() => Product, (product) => product.size)
+  product: Product;
 
   @Column()
   size_name: string;
