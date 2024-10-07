@@ -11,7 +11,6 @@ import { User } from 'src/app/users/entities/user.entity';
 export class Auth {
   @PrimaryGeneratedColumn()
   id: number;
-
   @OneToOne(() => User, (user) => user.auth)
   user: User;
   @Column()

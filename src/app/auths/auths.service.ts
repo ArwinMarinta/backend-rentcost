@@ -66,33 +66,43 @@ export class AuthsService {
       throw new ConflictException('Email already exists');
     }
 
-    await this.dataSource.transaction(async (user) => {
-      const newAuth = await user
-        .createQueryBuilder()
-        .insert()
-        .into(Auth)
-        .values({
-          email: createAuthDto.email,
-          password: await bcrypt.hash(createAuthDto.password, 10),
-          is_verified: false,
-        })
-        .execute();
+    await this.dataSource.transaction(async (manager) => {
+      try {
+        const newAuth = await manager
+          .createQueryBuilder()
+          .insert()
+          .into(Auth)
+          .values({
+            email: createAuthDto.email,
+            password: await bcrypt.hash(createAuthDto.password, 10),
+            is_verified: false,
+          })
+          .execute();
 
-      await this.dataSource
-        .createQueryBuilder()
-        .insert()
-        .into(User)
-        .values({
-          username: createAuthDto.username,
-          phone_number: createAuthDto.phone_number,
-          location: createAuthDto.location,
-          identify_type: createAuthDto.identity_type,
-          identity_number: createAuthDto.identity_number,
-          bank_account: createAuthDto.bank_account,
-          image_url: createAuthDto.image_url,
-          auth: newAuth.identifiers[0].id,
-        })
-        .execute();
+        const newAuthId = newAuth.identifiers[0].id;
+
+        console.log(newAuthId);
+        console.log(newAuth);
+
+        await manager
+          .createQueryBuilder()
+          .insert()
+          .into(User)
+          .values({
+            username: createAuthDto.username,
+            phone_number: createAuthDto.phone_number,
+            location: createAuthDto.location,
+            identify_type: createAuthDto.identity_type,
+            identity_number: createAuthDto.identity_number,
+            bank_account: createAuthDto.bank_account,
+            image_url: createAuthDto.image_url,
+            auth: newAuthId,
+          })
+          .execute();
+      } catch (error) {
+        console.error('Error during transaction:', error);
+        throw error; // Re-throw to rollback transaction
+      }
     });
   }
 

@@ -31,7 +31,7 @@ export class Address {
   state: string;
 
   @Column()
-  zip_code: string;
+  zip_code: number;
 
   @Column()
   address1: string;
