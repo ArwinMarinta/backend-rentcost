@@ -88,11 +88,11 @@ export class AuthsService {
           .values({
             username: createAuthDto.username,
             phone_number: createAuthDto.phone_number,
-            location: createAuthDto.location,
-            identify_type: createAuthDto.identity_type,
-            identity_number: createAuthDto.identity_number,
-            bank_account: createAuthDto.bank_account,
-            image_url: createAuthDto.image_url,
+            // location: createAuthDto.location,
+            // identify_type: createAuthDto.identity_type,
+            // identity_number: createAuthDto.identity_number,
+            // bank_account: createAuthDto.bank_account,
+            // image_url: createAuthDto.image_url,
             auth: newAuthId,
           })
           .execute();

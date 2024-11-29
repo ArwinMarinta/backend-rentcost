@@ -32,7 +32,7 @@ export class CategoriesController {
     const categories = await this.categoriesService.findAll();
     return {
       message: 'Categories fetched successfully',
-      categories,
+      data: categories,
     };
   }
 

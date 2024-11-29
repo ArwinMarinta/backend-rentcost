@@ -13,11 +13,11 @@ export class Auth {
   id: number;
   @OneToOne(() => User, (user) => user.auth)
   user: User;
-  @Column()
+  @Column({ unique: true })
   email: string;
   @Column()
   password: string;
-  @Column()
+  @Column({ default: true })
   is_verified: boolean;
   @CreateDateColumn()
   created_at: Date;

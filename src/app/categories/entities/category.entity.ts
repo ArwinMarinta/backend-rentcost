@@ -15,6 +15,8 @@ export class Category {
   product: Product;
   @Column()
   category_name: string;
+  @Column()
+  image_url: string;
   @CreateDateColumn()
   created_at: Date;
 }

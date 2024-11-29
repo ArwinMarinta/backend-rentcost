@@ -1,9 +1,9 @@
-import { Product } from 'src/app/products/entities/product.entity';
+import { Stock } from 'src/app/stock/entities/stock.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
+  ManyToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 @Entity()
@@ -11,11 +11,11 @@ export class Size {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Product, (product) => product.size)
-  product: Product;
-
   @Column()
   size_name: string;
+
+  @ManyToMany(() => Stock, (stock) => stock.size)
+  stock: Stock;
 
   @CreateDateColumn()
   created_at: Date;

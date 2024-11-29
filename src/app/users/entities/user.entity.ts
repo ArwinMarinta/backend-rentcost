@@ -39,19 +39,19 @@ export class User {
   @Column()
   phone_number: string;
 
-  @Column()
+  @Column({ nullable: true })
   location: string;
 
-  @Column()
+  @Column({ nullable: true })
   identify_type: string;
 
-  @Column()
+  @Column({ nullable: true })
   identity_number: string;
 
-  @Column()
+  @Column({ nullable: true })
   bank_account: string;
 
-  @Column()
+  @Column({ nullable: true })
   image_url: string;
 
   @CreateDateColumn()

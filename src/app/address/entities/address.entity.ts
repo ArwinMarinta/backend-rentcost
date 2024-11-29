@@ -16,10 +16,7 @@ export class Address {
   user: User;
 
   @Column()
-  first_name: string;
-
-  @Column()
-  last_name: string;
+  username: string;
 
   @Column()
   phone_number: string;
@@ -31,7 +28,7 @@ export class Address {
   state: string;
 
   @Column()
-  zip_code: number;
+  zip_code: string;
 
   @Column()
   address1: string;

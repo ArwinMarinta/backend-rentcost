@@ -5,6 +5,9 @@ import { Product } from './entities/product.entity';
 import { DataSource } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Store } from '../stores/entities/store.entity';
+import { Category } from '../categories/entities/category.entity';
+import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
+import { Stock } from '../stock/entities/stock.entity';
 
 @Injectable()
 export class ProductsService {
@@ -24,14 +27,50 @@ export class ProductsService {
       .findOne({ where: { user: { id: user.id } } });
 
     if (!store) {
-      throw new NotFoundException('store not found or not authenticated');
+      throw new NotFoundException('Store not found or not authenticated');
     }
-    await this.dataSource
-      .createQueryBuilder()
-      .insert()
-      .into(Product)
-      .values({ ...createProductDto, store })
-      .execute();
+
+    const category = await this.dataSource
+      .getRepository(Category)
+      .findOne({ where: { id: createProductDto.category_id } });
+    if (!category) {
+      throw new NotFoundException('category not found or not authenticated');
+    }
+
+    await this.dataSource.transaction(async (stock) => {
+      try {
+        const newProduct = await stock
+          .createQueryBuilder()
+          .insert()
+          .into(Product)
+          .values({
+            product_name: createProductDto.product_name,
+            price: createProductDto.price,
+            image_url: createProductDto.image_url,
+            category: { id: category.id },
+            store: { id: store.id },
+          })
+          .execute();
+
+        const product_id = newProduct.identifiers[0].id;
+
+        const stockData = createProductDto.size_stock.map((item) => ({
+          stok: item.stok,
+          available: true,
+          product: { id: product_id },
+          size: { id: item.size_id },
+        }));
+
+        await stock
+          .createQueryBuilder()
+          .insert()
+          .into(Stock)
+          .values(stockData)
+          .execute();
+      } catch (error) {
+        createHttpException(error);
+      }
+    });
   }
 
   async findAll(): Promise<Product[]> {

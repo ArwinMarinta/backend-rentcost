@@ -18,6 +18,7 @@ import { TransactionsModule } from './app/transactions/transactions.module';
 import { TransactionItemsModule } from './app/transaction_items/transaction_items.module';
 import { AddressModule } from './app/address/address.module';
 import { PaymentsModule } from './app/payments/payments.module';
+import { StockModule } from './app/stock/stock.module';
 @Module({
   imports: [
     ConfigModule.forRoot({}),
@@ -46,6 +47,7 @@ import { PaymentsModule } from './app/payments/payments.module';
         },
       },
     }),
+    StockModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,6 @@
 import { CartsItem } from 'src/app/carts_item/entities/carts_item.entity';
 import { Category } from 'src/app/categories/entities/category.entity';
-import { Size } from 'src/app/sizes/entities/size.entity';
+import { Stock } from 'src/app/stock/entities/stock.entity';
 import { Store } from 'src/app/stores/entities/store.entity';
 import {
   Column,
@@ -21,11 +21,11 @@ export class Product {
   @ManyToOne(() => Category, (category) => category.product)
   category: Category;
 
-  @OneToMany(() => Size, (size) => size.product)
-  size: Size[];
-
   @OneToMany(() => CartsItem, (cartItem) => cartItem.product)
   cartItem: CartsItem[];
+
+  @OneToMany(() => Stock, (stock) => stock.product)
+  stock: Stock;
 
   @Column()
   product_name: string;
@@ -41,9 +41,6 @@ export class Product {
 
   @Column({ default: 0 })
   rental_amount: number;
-
-  @Column({ default: 0 })
-  stock: number;
 
   @Column({ default: 0 })
   discount: number;

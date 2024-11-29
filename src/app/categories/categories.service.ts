@@ -22,6 +22,7 @@ export class CategoriesService {
       select: {
         id: true,
         category_name: true,
+        image_url: true,
       },
     });
 
