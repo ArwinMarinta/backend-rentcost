@@ -19,6 +19,7 @@ import { TransactionItemsModule } from './app/transaction_items/transaction_item
 import { AddressModule } from './app/address/address.module';
 import { PaymentsModule } from './app/payments/payments.module';
 import { StockModule } from './app/stock/stock.module';
+import { ImageKitModule } from './utils/imagekit.module';
 @Module({
   imports: [
     ConfigModule.forRoot({}),
@@ -36,6 +37,7 @@ import { StockModule } from './app/stock/stock.module';
     TransactionItemsModule,
     AddressModule,
     PaymentsModule,
+    ImageKitModule,
     MailerModule.forRoot({
       transport: {
         host: process.env.MAIL_HOST,
