@@ -7,8 +7,19 @@ import { Banner } from './entities/banner.entity';
 @Injectable()
 export class BannersService {
   constructor(private dataSource: DataSource) {}
-  create(createBannerDto: CreateBannerDto) {
-    return 'This action adds a new banner';
+
+  async create(createBannerDto: CreateBannerDto, url: string): Promise<void> {
+    await this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(Banner)
+      .values({
+        banner_name: createBannerDto.banner_name,
+        image_url: url,
+      })
+      .orIgnore()
+      .returning(['id', 'created_at'])
+      .execute();
   }
 
   async findAll(): Promise<Banner[]> {

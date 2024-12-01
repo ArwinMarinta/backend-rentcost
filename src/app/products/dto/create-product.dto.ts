@@ -1,12 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsString,
-  IsNotEmpty,
-  IsNumber,
-  IsArray,
-  ValidateNested,
-} from 'class-validator';
-import { CreateStockDto } from 'src/app/stock/dto/create-stock.dto';
+import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateProductDto {
   @IsNotEmpty()
@@ -15,19 +8,15 @@ export class CreateProductDto {
 
   @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   price: number;
 
   @IsNotEmpty()
-  @IsString()
-  image_url: string;
-
-  @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   category_id: number;
 
   @IsNotEmpty()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateStockDto)
-  size_stock: CreateStockDto[];
+  @IsString()
+  size_stock: string;
 }

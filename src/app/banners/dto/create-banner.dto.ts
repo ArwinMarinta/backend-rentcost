@@ -1,1 +1,3 @@
-export class CreateBannerDto {}
+export class CreateBannerDto {
+  banner_name: string;
+}

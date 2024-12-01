@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
@@ -13,7 +17,13 @@ import { Stock } from '../stock/entities/stock.entity';
 export class ProductsService {
   constructor(private dataSource: DataSource) {}
 
-  async create(createProductDto: CreateProductDto, req: any): Promise<void> {
+  async create(
+    createProductDto: CreateProductDto,
+    req: any,
+    url: string,
+    sizeStockArray: Array<{ size_id: number; stok: number }>,
+  ): Promise<void> {
+    console.log(createProductDto);
     const user = await this.dataSource
       .getRepository(User)
       .findOne({ where: { auth: req.user.auth_id } });
@@ -46,7 +56,7 @@ export class ProductsService {
           .values({
             product_name: createProductDto.product_name,
             price: createProductDto.price,
-            image_url: createProductDto.image_url,
+            image_url: url,
             category: { id: category.id },
             store: { id: store.id },
           })
@@ -54,7 +64,7 @@ export class ProductsService {
 
         const product_id = newProduct.identifiers[0].id;
 
-        const stockData = createProductDto.size_stock.map((item) => ({
+        const stockData = sizeStockArray.map((item) => ({
           stok: item.stok,
           available: true,
           product: { id: product_id },
@@ -76,11 +86,52 @@ export class ProductsService {
   async findAll(): Promise<Product[]> {
     const products = await this.dataSource.getRepository(Product).find({
       where: {
-        available: true,
+        stock: {
+          available: true,
+        },
+      },
+      relations: ['stock'],
+      select: {
+        id: true,
+        product_name: true,
+        price: true,
+        image_url: true,
+        stock: {
+          id: true,
+          stok: true,
+          available: true,
+        },
       },
     });
 
     return products;
+  }
+
+  async findByQuery(filter: string = '', search: string = ''): Promise<any[]> {
+    const queryBuilder = this.dataSource
+      .getRepository(Product)
+      .createQueryBuilder('product');
+
+    if (filter && filter.includes('populer')) {
+      queryBuilder.orderBy('product.rental_amount', 'DESC');
+    }
+
+    if (filter && filter.includes('news')) {
+      queryBuilder.orderBy('product.created_at', 'DESC');
+    }
+
+    if (search) {
+      queryBuilder.andWhere('product.product_name ILIKE :search', {
+        search: `%${search}%`,
+      });
+    }
+
+    try {
+      const products = await queryBuilder.getMany();
+      return products;
+    } catch (error) {
+      throw new BadRequestException('Error executing query', error);
+    }
   }
 
   findOne(id: number) {

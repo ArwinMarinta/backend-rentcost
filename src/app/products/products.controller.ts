@@ -8,28 +8,78 @@ import {
   Delete,
   UseGuards,
   Request,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
+  Query,
+  Search,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
 import { AuthGuard } from '../auths/auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageKitService } from 'src/utils/imagekit.service';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly fileService: ImageKitService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post()
+  @UseInterceptors(FileInterceptor('image_url'))
   async create(
     @Request() req: any,
+    @UploadedFile() image_url: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
   ) {
-    await this.productsService.create(createProductDto, req);
+    const uploadResult = await this.fileService.uploadImage(image_url);
+
+    // Remove surrounding quotes and parse JSON
+    let sizeStockArray: Array<{ size_id: number; stok: number }> = [];
+
+    if (typeof createProductDto.size_stock === 'string') {
+      try {
+        sizeStockArray = JSON.parse(
+          createProductDto.size_stock.replace(/^"|"$/g, ''),
+        );
+      } catch (error) {
+        throw new BadRequestException('Invalid size_stock format');
+      }
+    }
+
+    await this.productsService.create(
+      createProductDto,
+      req,
+      uploadResult.url,
+      sizeStockArray,
+    );
 
     return {
       message: 'Product created successfully',
     };
+  }
+
+  @Get()
+  async findByQuery(
+    @Query('filter') filter: string,
+    @Query('search') search: string,
+  ) {
+    try {
+      console.log(search);
+      const products = await this.productsService.findByQuery(filter, search);
+
+      return {
+        message: 'Get all products successfully',
+        data: products,
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
   }
 
   @Get()

@@ -7,20 +7,38 @@ import {
   Param,
   Delete,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { BannersService } from './banners.service';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
 import { AuthGuard } from '../auths/auth.guard';
 import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
+import { ImageKitService } from 'src/utils/imagekit.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('banners')
 export class BannersController {
-  constructor(private readonly bannersService: BannersService) {}
+  constructor(
+    private readonly bannersService: BannersService,
+    private readonly fileService: ImageKitService,
+  ) {}
 
   @Post()
-  create(@Body() createBannerDto: CreateBannerDto) {
-    return this.bannersService.create(createBannerDto);
+  @UseInterceptors(FileInterceptor('image_url'))
+  async create(
+    @UploadedFile() image_url: Express.Multer.File,
+    @Body()
+    createBannerDto: CreateBannerDto,
+  ) {
+    const uploadResult = await this.fileService.uploadImage(image_url);
+
+    await this.bannersService.create(createBannerDto, uploadResult.url);
+
+    return {
+      message: 'Successfully create Banner',
+    };
   }
 
   @UseGuards(AuthGuard)

@@ -8,12 +8,19 @@ import { DataSource } from 'typeorm';
 export class CategoriesService {
   constructor(private dataSource: DataSource) {}
 
-  async create(createCategoryDto: CreateCategoryDto): Promise<void> {
+  async create(
+    createCategoryDto: CreateCategoryDto,
+    url: string,
+  ): Promise<void> {
     await this.dataSource
       .createQueryBuilder()
       .insert()
       .into(Category)
-      .values(createCategoryDto)
+      .values({
+        category_name: createCategoryDto.category_name,
+        image_url: url,
+      })
+      .returning(['id', 'created_at'])
       .execute();
   }
 
