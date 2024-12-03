@@ -8,6 +8,7 @@ import { UpdateStoreDto } from './dto/update-store.dto';
 import { DataSource } from 'typeorm';
 import { Store } from './entities/store.entity';
 import { User } from '../users/entities/user.entity';
+import { Product } from '../products/entities/product.entity';
 
 @Injectable()
 export class StoresService {
@@ -35,6 +36,32 @@ export class StoresService {
       .into(Store)
       .values({ ...createStoreDto, user: user })
       .execute();
+  }
+
+  async findProductUser(req: any): Promise<any[]> {
+    const user = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { auth: { id: req.user.auth_id } } });
+
+    if (!user) {
+      throw new NotFoundException('User not found or not authenticated');
+    }
+
+    const store = await this.dataSource.getRepository(Store).findOne({
+      where: {
+        user: { id: user.id },
+      },
+    });
+
+    if (!store) {
+      throw new NotFoundException('store not found or not authenticated');
+    }
+
+    const product = await this.dataSource
+      .getRepository(Product)
+      .find({ where: { store: { id: store.id } } });
+
+    return product;
   }
 
   async findAll(): Promise<CreateStoreDto[]> {

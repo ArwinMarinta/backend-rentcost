@@ -25,7 +25,7 @@ export class Product {
   cartItem: CartsItem[];
 
   @OneToMany(() => Stock, (stock) => stock.product)
-  stock: Stock;
+  stock: Stock[];
 
   @Column()
   product_name: string;

@@ -34,6 +34,21 @@ export class StoresController {
   }
 
   @UseGuards(AuthGuard)
+  @Get('user')
+  async findProductUser(@Request() req: any) {
+    try {
+      const product = await this.storesService.findProductUser(req);
+
+      return {
+        message: 'Get all product successfully',
+        data: product,
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
+  }
+
+  @UseGuards(AuthGuard)
   @Get()
   async findAll() {
     try {

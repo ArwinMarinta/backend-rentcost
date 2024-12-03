@@ -89,9 +89,11 @@ export class CartsService {
       .getRepository(Cart)
       .createQueryBuilder('cart')
       .leftJoinAndSelect('cart.cartItem', 'cartItem') // Join dengan tabel CartItem
-      .leftJoinAndSelect('cartItem.product', 'product') // Join dengan tabel Product jika ada
+      .leftJoinAndSelect('cartItem.product', 'product') // Join dengan tabel Product
+      .leftJoinAndSelect('product.stock', 'stock') // Join dengan tabel Stocks (one-to-many)
+      .leftJoinAndSelect('cart.shippingAddress', 'address')
       .where('cart.user = :userId', { userId: user.id })
-      .getMany(); // Mengambil semua keranjang terkait;
+      .getMany(); // Mengambil semua keranjang terkait
 
     if (!carts || carts.length === 0) {
       throw new NotFoundException('No carts found for this user');
@@ -99,6 +101,17 @@ export class CartsService {
 
     return carts.map((cart) => ({
       cartId: cart.id,
+      shippingAddress: cart.shippingAddress
+        ? {
+            username: cart.shippingAddress.username,
+            phone_number: cart.shippingAddress.phone_number,
+            city: cart.shippingAddress.city,
+            state: cart.shippingAddress.state,
+            address1: cart.shippingAddress.address1,
+            address2: cart.shippingAddress.address2,
+            zip_zode: cart.shippingAddress.zip_code,
+          }
+        : null,
       items: (cart.cartItem || [])
         .map((cartItem) => {
           if (cartItem && cartItem.product) {
@@ -107,12 +120,20 @@ export class CartsService {
               quantity: cartItem.quantity,
               product: {
                 productId: cartItem.product.id,
-                productName: cartItem.product.product_name,
+                product_name: cartItem.product.product_name,
                 price: cartItem.product.price,
+                rate: cartItem.product.rate,
+                image_url: cartItem.product.image_url,
+                rental_amount: cartItem.product.rental_amount,
               },
+              stock: (cartItem.product.stock || []).map((stock) => ({
+                stockId: stock.id,
+                available: stock.available,
+                stok: stock.stok,
+              })),
             };
           }
-          return null; // Atau bisa disesuaikan dengan apa yang ingin kamu lakukan jika null
+          return null; // Atau bisa disesuaikan dengan apa yang ingin Anda lakukan jika null
         })
         .filter((item) => item !== null), // Filter untuk menghapus item yang null
     }));

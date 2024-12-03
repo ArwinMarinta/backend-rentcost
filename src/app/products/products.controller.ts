@@ -12,7 +12,6 @@ import {
   UseInterceptors,
   BadRequestException,
   Query,
-  Search,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -65,6 +64,20 @@ export class ProductsController {
   }
 
   @Get()
+  async findAll() {
+    try {
+      const products = await this.productsService.findAll();
+
+      return {
+        message: 'Get all products successfully',
+        data: products,
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
+  }
+
+  @Get('search')
   async findByQuery(
     @Query('filter') filter: string,
     @Query('search') search: string,
@@ -82,23 +95,18 @@ export class ProductsController {
     }
   }
 
-  @Get()
-  async findAll() {
+  @Get(':id')
+  async findOne(@Param('id') id: number) {
     try {
-      const products = await this.productsService.findAll();
+      const detail = await this.productsService.findOne(id);
 
       return {
         message: 'Get all products successfully',
-        data: products,
+        data: detail,
       };
     } catch (error) {
       createHttpException(error);
     }
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(+id);
   }
 
   @Patch(':id')

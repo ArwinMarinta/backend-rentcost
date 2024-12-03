@@ -110,14 +110,15 @@ export class ProductsService {
   async findByQuery(filter: string = '', search: string = ''): Promise<any[]> {
     const queryBuilder = this.dataSource
       .getRepository(Product)
-      .createQueryBuilder('product');
+      .createQueryBuilder('product')
+      .innerJoin('product.stock', 'stock', 'stock.available = true');
 
     if (filter && filter.includes('populer')) {
-      queryBuilder.orderBy('product.rental_amount', 'DESC');
+      queryBuilder.orderBy('product.rental_amount', 'DESC').limit(15);
     }
 
     if (filter && filter.includes('news')) {
-      queryBuilder.orderBy('product.created_at', 'DESC');
+      queryBuilder.orderBy('product.created_at', 'DESC').limit(15);
     }
 
     if (search) {
@@ -134,8 +135,31 @@ export class ProductsService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: number) {
+    const detail = await this.dataSource.getRepository(Product).findOne({
+      where: { id: id },
+      relations: ['stock', 'store'],
+      select: {
+        id: true,
+        product_name: true,
+        rate: true,
+        price: true,
+        image_url: true,
+        rental_amount: true,
+        stock: {
+          id: true,
+          stok: true,
+          available: true,
+        },
+        store: {
+          id: true,
+          store_name: true,
+          store_location: true,
+        },
+      },
+    });
+
+    return detail;
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
