@@ -1,4 +1,12 @@
-import { Controller, Post, Body, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  ValidationPipe,
+  Patch,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthsService } from './auths.service';
 import { CreateLoginDto } from './dto/create-login.dto';
 import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
@@ -6,6 +14,8 @@ import { ResetPasswordRequestDto } from './dto/reset-password-request.dto';
 import { ConfirmPasswordDto } from './dto/confirm-password';
 // import { CreateRegisDto } from './dto/create-regis.dto';
 import { CreateAuthDto } from './dto/create-auth.dto';
+import { AuthGuard } from './auth.guard';
+import { ChangePasswordDto } from './dto/change-passoword';
 
 @Controller('auth')
 export class AuthsController {
@@ -58,6 +68,22 @@ export class AuthsController {
       await this.authsService.confirmResetPassword(confirmPasswordDto);
       return {
         message: 'Confirm password successfully',
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('change-password')
+  async ChangePassword(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Request() req: any,
+  ) {
+    try {
+      await this.authsService.changePassword(changePasswordDto, req);
+      return {
+        message: 'Berhasil Mengubah password',
       };
     } catch (error) {
       createHttpException(error);

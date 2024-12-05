@@ -83,7 +83,6 @@ export class ProductsController {
     @Query('search') search: string,
   ) {
     try {
-      console.log(search);
       const products = await this.productsService.findByQuery(filter, search);
 
       return {

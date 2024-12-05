@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
 import { DataSource } from 'typeorm';
@@ -29,6 +29,9 @@ export class BannersService {
         banner_name: true,
         image_url: true,
       },
+      order: {
+        created_at: 'DESC',
+      },
     });
 
     return banners;
@@ -42,7 +45,15 @@ export class BannersService {
     return `This action updates a #${id} banner`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} banner`;
+  async remove(id: number): Promise<void> {
+    const banner = await this.dataSource
+      .getRepository(Banner)
+      .findOne({ where: { id: id } });
+
+    if (!banner) {
+      throw new NotFoundException('Banner not found');
+    }
+
+    await this.dataSource.getRepository(Banner).delete(banner.id);
   }
 }

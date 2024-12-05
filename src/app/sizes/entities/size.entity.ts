@@ -3,7 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 @Entity()
@@ -14,8 +14,8 @@ export class Size {
   @Column()
   size_name: string;
 
-  @ManyToMany(() => Stock, (stock) => stock.size)
-  stock: Stock;
+  @OneToMany(() => Stock, (stock) => stock.size)
+  stock: Stock[];
 
   @CreateDateColumn()
   created_at: Date;

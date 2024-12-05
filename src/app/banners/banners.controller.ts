@@ -66,7 +66,10 @@ export class BannersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bannersService.remove(+id);
+  remove(@Param('id') id: number) {
+    this.bannersService.remove(id);
+    return {
+      message: 'Succesfully get banner',
+    };
   }
 }

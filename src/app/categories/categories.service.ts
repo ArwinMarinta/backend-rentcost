@@ -31,6 +31,9 @@ export class CategoriesService {
         category_name: true,
         image_url: true,
       },
+      order: {
+        created_at: 'DESC',
+      },
     });
 
     return categories;

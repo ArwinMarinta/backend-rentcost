@@ -15,6 +15,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPasswordRequestDto } from './dto/reset-password-request.dto';
 import { ConfirmPasswordDto } from './dto/confirm-password';
+import { ChangePasswordDto } from './dto/change-passoword';
 
 @Injectable()
 export class AuthsService {
@@ -156,6 +157,34 @@ export class AuthsService {
         password: await bcrypt.hash(confirmPasswordDto.password, 10),
       })
       .where('id = :id', { id: payload.user })
+      .execute();
+  }
+
+  async changePassword(
+    changePassword: ChangePasswordDto,
+    req: any,
+  ): Promise<void> {
+    const auth = await this.dataSource
+      .getRepository(Auth)
+      .findOne({ where: { id: req.user.auth_id } });
+
+    if (!auth) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isMatch = await bcrypt.compare(
+      changePassword.oldPassword,
+      auth.password,
+    );
+    if (!isMatch) {
+      throw new UnauthorizedException('Password lama salah');
+    }
+
+    await this.dataSource
+      .createQueryBuilder()
+      .update(Auth)
+      .set({ password: await bcrypt.hash(changePassword.NewPassword, 10) })
+      .where('id = :id', { id: auth.id })
       .execute();
   }
 }

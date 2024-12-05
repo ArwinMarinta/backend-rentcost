@@ -138,7 +138,7 @@ export class ProductsService {
   async findOne(id: number) {
     const detail = await this.dataSource.getRepository(Product).findOne({
       where: { id: id },
-      relations: ['stock', 'store'],
+      relations: ['stock', 'store', 'stock.size'],
       select: {
         id: true,
         product_name: true,
@@ -148,6 +148,9 @@ export class ProductsService {
         rental_amount: true,
         stock: {
           id: true,
+          size: {
+            size_name: true,
+          },
           stok: true,
           available: true,
         },
