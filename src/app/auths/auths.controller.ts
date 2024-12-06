@@ -51,19 +51,18 @@ export class AuthsController {
     @Body(new ValidationPipe()) resetPasswordDto: ResetPasswordRequestDto,
   ) {
     try {
-      await this.authsService.resetPassword(resetPasswordDto);
+      const token = await this.authsService.resetPassword(resetPasswordDto);
       return {
-        message: 'Reset password successfully',
+        message: 'Verifikasi email berhasil',
+        token: token,
       };
     } catch (error) {
       createHttpException(error);
     }
   }
 
-  @Post('/confirm-password')
-  async confirmPassword(
-    @Body(new ValidationPipe()) confirmPasswordDto: ConfirmPasswordDto,
-  ) {
+  @Patch('/confirm-password')
+  async confirmPassword(@Body() confirmPasswordDto: ConfirmPasswordDto) {
     try {
       await this.authsService.confirmResetPassword(confirmPasswordDto);
       return {

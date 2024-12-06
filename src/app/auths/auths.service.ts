@@ -113,37 +113,44 @@ export class AuthsService {
       select: ['id', 'email', 'user'],
     });
     if (!user) {
-      throw new NotFoundException('User Not Found');
+      throw new NotFoundException('Email tidak ditemukan');
     }
     const resetToken = await this.jwtService.signAsync(
       {
-        user: user.id,
+        email: user.email,
       },
       {
         secret: process.env.MAIL_SECRET,
         expiresIn: '5m',
       },
     );
-    const link = `${process.env.RESET_PASSWORD_LINK || 'http://localhost:3000'}?token=${resetToken}`;
-    const html = `<b> Hi ${user.user.username}, </b>
-<p> You requested to reset your password. </p>
-<p> Please, click the link below to reset your password. </p>
-<a href = "${link}"> Reset Password </a>  `;
-    await this.mailerService.sendMail({
-      from: process.env.MAIL_USER,
-      to: user.email,
-      subject: 'Reset Password Request',
-      html,
-    });
+
+    return resetToken;
+
+    //     const link = `${process.env.RESET_PASSWORD_LINK || 'http://localhost:3000'}?token=${resetToken}`;
+    //     const html = `<b> Hi ${user.user.username}, </b>
+    // <p> You requested to reset your password. </p>
+    // <p> Please, click the link below to reset your password. </p>
+    // <a href = "${link}"> Reset Password </a>  `;
+    //     await this.mailerService.sendMail({
+    //       from: process.env.MAIL_USER,
+    //       to: user.email,
+    //       subject: 'Reset Password Request',
+    //       html,
+    //     });
   }
 
-  async confirmResetPassword(confirmPasswordDto: ConfirmPasswordDto) {
+  async confirmResetPassword(
+    confirmPasswordDto: ConfirmPasswordDto,
+  ): Promise<void> {
     const payload = await this.jwtService.verifyAsync(
       confirmPasswordDto.token,
       {
         secret: process.env.MAIL_SECRET,
       },
     );
+
+    console.log(payload.email);
     if (!payload) {
       throw new UnauthorizedException('Invalid Token');
     }
@@ -156,7 +163,7 @@ export class AuthsService {
       .set({
         password: await bcrypt.hash(confirmPasswordDto.password, 10),
       })
-      .where('id = :id', { id: payload.user })
+      .where('email = :email', { email: payload.user })
       .execute();
   }
 
