@@ -108,13 +108,16 @@ export class ProductsController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
+  @UseInterceptors(FileInterceptor('image_url'))
   async update(
-    @Param('id') id: string,
+    @Param('id') id: number,
+    @UploadedFile() image_url: Express.Multer.File,
     @Body() updateProductDto: UpdateProductDto,
   ) {
     try {
-      await this.productsService.update(+id, updateProductDto);
+      await this.productsService.update(id, updateProductDto, image_url);
       return {
         message: 'Update product successfully',
       };
@@ -123,10 +126,11 @@ export class ProductsController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Request() req: any, @Param('id') id: number) {
     try {
-      await this.productsService.remove(+id);
+      await this.productsService.remove(id, req);
 
       return {
         message: 'Category successfully removed',

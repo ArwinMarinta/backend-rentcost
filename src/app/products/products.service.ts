@@ -12,10 +12,14 @@ import { Store } from '../stores/entities/store.entity';
 import { Category } from '../categories/entities/category.entity';
 import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
 import { Stock } from '../stock/entities/stock.entity';
+import { ImageKitService } from 'src/utils/imagekit.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private readonly fileService: ImageKitService,
+    private dataSource: DataSource,
+  ) {}
 
   async create(
     createProductDto: CreateProductDto,
@@ -23,14 +27,14 @@ export class ProductsService {
     url: string,
     sizeStockArray: Array<{ size_id: number; stok: number }>,
   ): Promise<void> {
-    console.log(createProductDto);
     const user = await this.dataSource
       .getRepository(User)
-      .findOne({ where: { auth: req.user.auth_id } });
+      .findOne({ where: { auth: { id: req.user.auth_id } } });
 
     if (!user) {
       throw new NotFoundException('User not found or not authenticated');
     }
+    console.log(user.id);
 
     const store = await this.dataSource
       .getRepository(Store)
@@ -165,34 +169,69 @@ export class ProductsService {
     return detail;
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto) {
-    const product = await this.dataSource.getRepository(Product).findOne({
-      where: { id },
-    });
+  async update(id: number, updateProductDto: UpdateProductDto, image_url: any) {
+    const exitingProduct = await this.dataSource
+      .getRepository(Product)
+      .findOne({
+        where: { id },
+      });
 
-    if (!product) {
+    if (!exitingProduct) {
       throw new NotFoundException('Product not found');
+    }
+
+    if (image_url && exitingProduct.image_url !== image_url.originalname) {
+      const uploadedImage = await this.fileService.uploadImage(image_url);
+
+      image_url = uploadedImage.url;
     }
 
     await this.dataSource
       .createQueryBuilder()
       .update(Product)
-      .set(updateProductDto)
+      .set({
+        product_name: updateProductDto.product_name,
+        price: updateProductDto.price,
+        image_url: image_url,
+        category: { id: updateProductDto.category_id },
+      })
       .where('id = :id', { id })
       .execute();
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, req: any): Promise<void> {
+    if (!req.user || !req.user.auth_id) {
+      throw new NotFoundException('User not found or not authenticated');
+    }
+
+    const user = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { auth: { id: req.user.auth_id } } });
+
+    if (!user) {
+      throw new NotFoundException('User not found or not authenticated');
+    }
+
+    const store = await this.dataSource
+      .getRepository(Store)
+      .findOne({ where: { user: { id: user.id } } });
+
+    if (!store) {
+      throw new NotFoundException('Store not found or not authenticated');
+    }
+
     const product = await this.dataSource.getRepository(Product).findOne({
-      where: {
-        id: id,
-      },
+      where: { id: id },
     });
 
     if (!product) {
       throw new NotFoundException('Product not found');
     }
 
+    // Hapus stok dan produk
+    await this.dataSource
+      .getRepository(Stock)
+      .delete({ product: { id: product.id } });
     await this.dataSource.getRepository(Product).delete(product.id);
   }
 }

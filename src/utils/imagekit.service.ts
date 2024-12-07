@@ -35,4 +35,31 @@ export class ImageKitService {
       );
     });
   }
+
+  async updateImage(
+    file: Express.Multer.File,
+    oldImageId: string,
+  ): Promise<any> {
+    try {
+      // 1. Hapus gambar lama
+      await this.deleteImage(oldImageId);
+
+      // 2. Upload gambar baru
+      return await this.uploadImage(file);
+    } catch (error) {
+      throw new Error('Error updating image: ' + error.message);
+    }
+  }
+
+  async deleteImage(imageId: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.imageKit.deleteFile(imageId, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
 }
