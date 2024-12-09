@@ -1,4 +1,14 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateStockDto } from './create-stock.dto';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class UpdateStockDto extends PartialType(CreateStockDto) {}
+export class UpdateStockDto {
+  @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  size_id: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  stok: number;
+}

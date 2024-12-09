@@ -15,4 +15,6 @@ export class UpdateProductDto {
   @IsNumber()
   @Type(() => Number)
   category_id: number;
+
+  image_url: string;
 }

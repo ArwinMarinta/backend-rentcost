@@ -35,10 +35,10 @@ export class StockController {
     }
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.stockService.findAll();
-  // }
+  @Get()
+  findAll() {
+    return this.stockService.findAll();
+  }
 
   @UseGuards(AuthGuard)
   @Get(':id')
@@ -55,13 +55,34 @@ export class StockController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStockDto: UpdateStockDto) {
-    return this.stockService.update(+id, updateStockDto);
+  async update(
+    @Param('id') id: number,
+    @Body() updateStockDto: UpdateStockDto,
+  ) {
+    try {
+      await this.stockService.update(id, updateStockDto);
+
+      return {
+        message: 'Berhasil mengubah stok',
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.stockService.remove(+id);
+  async remove(@Param('id') id: number) {
+    try {
+      await this.stockService.remove(id);
+
+      return {
+        message: 'Berhasil menghapus stok',
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
   }
 }

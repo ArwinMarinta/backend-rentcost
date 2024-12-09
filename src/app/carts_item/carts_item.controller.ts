@@ -6,10 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { CartsItemService } from './carts_item.service';
 import { CreateCartsItemDto } from './dto/create-carts_item.dto';
 import { UpdateCartsItemDto } from './dto/update-carts_item.dto';
+import { AuthGuard } from '../auths/auth.guard';
+import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
 
 @Controller('carts-item')
 export class CartsItemController {
@@ -20,9 +24,19 @@ export class CartsItemController {
     return this.cartsItemService.create(createCartsItemDto);
   }
 
+  @UseGuards(AuthGuard)
   @Get()
-  findAll() {
-    return this.cartsItemService.findAll();
+  async findAll(@Request() req: any) {
+    try {
+      const cartItem = await this.cartsItemService.findAll(req);
+
+      return {
+        message: 'Berhasil get cart',
+        data: cartItem,
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
   }
 
   @Get(':id')

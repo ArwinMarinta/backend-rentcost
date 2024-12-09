@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
 import { Cart } from './entities/cart.entity';
 import { CartsItem } from '../carts_item/entities/carts_item.entity';
+import { Size } from '../sizes/entities/size.entity';
 
 @Injectable()
 export class CartsService {
@@ -29,6 +30,14 @@ export class CartsService {
       throw new NotFoundException('User not found or not authenticated');
     }
 
+    const size = await this.dataSource
+      .getRepository(Size)
+      .findOne({ where: { id: createCartDto.size_id } });
+
+    if (!size) {
+      throw new NotFoundException('Size not found');
+    }
+
     await this.dataSource.transaction(async (shop) => {
       try {
         // Cek apakah cart sudah ada untuk user
@@ -43,7 +52,8 @@ export class CartsService {
             .insert()
             .into(CartsItem)
             .values({
-              quantity: createCartDto.quantity,
+              quantity: 1,
+              size: { id: size.id },
               cart: { id: existingCart.id }, // Referensi cart yang sudah ada
               product: product,
             })
@@ -64,7 +74,8 @@ export class CartsService {
             .insert()
             .into(CartsItem)
             .values({
-              quantity: createCartDto.quantity,
+              quantity: 1,
+              size: { id: size.id },
               cart: { id: cartId },
               product: product,
             })

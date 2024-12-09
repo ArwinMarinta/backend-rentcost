@@ -37,21 +37,42 @@ export class StockService {
   async findOne(id: number): Promise<any> {
     const stock = await this.dataSource.getRepository(Stock).findOne({
       where: { id: id },
-      // relations: ['size'],
-      select: {
-        stok: true,
-        size: { id: true },
-      },
+      relations: ['size'],
+      select: ['id', 'stok'],
     });
 
     return stock;
   }
 
-  update(id: number, updateStockDto: UpdateStockDto) {
-    return `This action updates a #${id} stock`;
+  async update(id: number, updateStockDto: UpdateStockDto) {
+    const stock = await this.dataSource
+      .getRepository(Stock)
+      .findOne({ where: { id: id } });
+
+    if (!stock) {
+      throw new NotFoundException('Stock tidak ditemukan');
+    }
+
+    await this.dataSource
+      .createQueryBuilder()
+      .update(Stock)
+      .set({
+        stok: updateStockDto.stok,
+        size: { id: updateStockDto.size_id },
+      })
+      .where('id = :id', { id })
+      .execute();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} stock`;
+  async remove(id: number) {
+    const stock = await this.dataSource
+      .getRepository(Stock)
+      .findOne({ where: { id: id } });
+
+    if (!stock) {
+      throw new NotFoundException('Stock tidak ditemukan');
+    }
+
+    await this.dataSource.getRepository(Stock).delete(stock.id);
   }
 }

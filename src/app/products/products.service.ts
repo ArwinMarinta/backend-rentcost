@@ -153,6 +153,7 @@ export class ProductsService {
         stock: {
           id: true,
           size: {
+            id: true,
             size_name: true,
           },
           stok: true,
@@ -169,7 +170,11 @@ export class ProductsService {
     return detail;
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto, image_url: any) {
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+    image_url: any,
+  ): Promise<void> {
     const exitingProduct = await this.dataSource
       .getRepository(Product)
       .findOne({
@@ -181,7 +186,10 @@ export class ProductsService {
     }
 
     if (image_url && exitingProduct.image_url !== image_url.originalname) {
-      const uploadedImage = await this.fileService.uploadImage(image_url);
+      const uploadedImage = await this.fileService.updateImage(
+        image_url,
+        exitingProduct.image_url,
+      );
 
       image_url = uploadedImage.url;
     }
@@ -192,7 +200,7 @@ export class ProductsService {
       .set({
         product_name: updateProductDto.product_name,
         price: updateProductDto.price,
-        image_url: image_url,
+        image_url: image_url != null ? image_url : updateProductDto.image_url,
         category: { id: updateProductDto.category_id },
       })
       .where('id = :id', { id })
@@ -228,7 +236,6 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    // Hapus stok dan produk
     await this.dataSource
       .getRepository(Stock)
       .delete({ product: { id: product.id } });

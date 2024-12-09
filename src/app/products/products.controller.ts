@@ -133,7 +133,7 @@ export class ProductsController {
       await this.productsService.remove(id, req);
 
       return {
-        message: 'Category successfully removed',
+        message: 'Costume successfully removed',
       };
     } catch (error) {
       createHttpException(error);
