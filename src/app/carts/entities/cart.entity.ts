@@ -23,5 +23,5 @@ export class Cart {
 
   @OneToOne(() => Address)
   @JoinColumn()
-  shippingAddress: Address;
+  address: Address;
 }

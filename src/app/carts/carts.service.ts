@@ -112,15 +112,15 @@ export class CartsService {
 
     return carts.map((cart) => ({
       cartId: cart.id,
-      shippingAddress: cart.shippingAddress
+      shippingAddress: cart.address
         ? {
-            username: cart.shippingAddress.username,
-            phone_number: cart.shippingAddress.phone_number,
-            city: cart.shippingAddress.city,
-            state: cart.shippingAddress.state,
-            address1: cart.shippingAddress.address1,
-            address2: cart.shippingAddress.address2,
-            zip_zode: cart.shippingAddress.zip_code,
+            username: cart.address.username,
+            phone_number: cart.address.phone_number,
+            city: cart.address.city,
+            state: cart.address.state,
+            address1: cart.address.address1,
+            address2: cart.address.address2,
+            zip_zode: cart.address.zip_code,
           }
         : null,
       items: (cart.cartItem || [])

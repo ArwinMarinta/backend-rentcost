@@ -38,4 +38,7 @@ export class Address {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @Column({ default: false })
+  used: boolean;
 }

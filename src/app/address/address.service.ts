@@ -35,9 +35,12 @@ export class AddressService {
       throw new NotFoundException('User not found or not authenticated');
     }
 
-    const addressUser = await this.dataSource
-      .getRepository(Address)
-      .find({ where: { user: { id: user.id } } });
+    const addressUser = await this.dataSource.getRepository(Address).find({
+      where: { user: { id: user.id } },
+      order: {
+        used: 'DESC',
+      },
+    });
 
     return addressUser;
   }
