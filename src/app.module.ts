@@ -8,7 +8,7 @@ import { SizesModule } from './app/sizes/sizes.module';
 import { StoresModule } from './app/stores/stores.module';
 import { ProductsModule } from './app/products/products.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { dataSourceOptions } from './database/datasource';
+import { dataSourceOptions } from './database/datasource.js';
 import { ConfigModule } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { BannersModule } from './app/banners/banners.module';
