@@ -25,7 +25,7 @@ export class User {
   cart: Cart;
 
   @OneToMany(() => Transaction, (transaction) => transaction.user)
-  transaction: Transaction;
+  transaction: Transaction[];
 
   @OneToOne(() => Store, (store) => store.user)
   store: Store;

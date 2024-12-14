@@ -61,9 +61,14 @@ export class AddressController {
     return this.addressService.findOne(+id);
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAddressDto: UpdateAddressDto) {
-    return this.addressService.update(+id, updateAddressDto);
+  async update(@Request() req: any, @Param('id') id: number) {
+    await this.addressService.update(id, req);
+
+    return {
+      message: 'Berhasil mengubah alamat pengiriman',
+    };
   }
 
   @Delete(':id')

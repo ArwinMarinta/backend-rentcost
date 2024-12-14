@@ -1,6 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
 import { DataSource } from 'typeorm';
 import { Product } from '../products/entities/product.entity';
 import { User } from '../users/entities/user.entity';
@@ -43,21 +46,33 @@ export class CartsService {
         // Cek apakah cart sudah ada untuk user
         const existingCart = await shop
           .getRepository(Cart)
-          .findOne({ where: { user: { id: user.id } } }); // Menggunakan user.id
+          .findOne({ where: { user: { id: user.id } } });
 
         if (existingCart) {
-          // Jika cart sudah ada, tambahkan item ke cart yang sudah ada
-          await shop
-            .createQueryBuilder()
-            .insert()
-            .into(CartsItem)
-            .values({
-              quantity: 1,
-              size: { id: size.id },
-              cart: { id: existingCart.id }, // Referensi cart yang sudah ada
-              product: product,
-            })
-            .execute();
+          // Cek apakah produk sudah ada dalam cart
+          const existingCartItem = await shop.getRepository(CartsItem).findOne({
+            where: {
+              cart: { id: existingCart.id },
+              product: { id: product.id },
+            },
+          });
+
+          if (existingCartItem) {
+            throw new ConflictException('Produk sudah ada didalam keranjang');
+          } else {
+            // Jika produk belum ada, tambah produk baru
+            await shop
+              .createQueryBuilder()
+              .insert()
+              .into(CartsItem)
+              .values({
+                quantity: 1,
+                size: { id: size.id },
+                cart: { id: existingCart.id },
+                product: product,
+              })
+              .execute();
+          }
         } else {
           // Jika tidak ada cart, buat cart baru
           const cart = await shop
@@ -158,7 +173,7 @@ export class CartsService {
     return `This action returns a #${id} cart`;
   }
 
-  update(id: number, updateCartDto: UpdateCartDto) {
+  update(id: number) {
     return `This action updates a #${id} cart`;
   }
 

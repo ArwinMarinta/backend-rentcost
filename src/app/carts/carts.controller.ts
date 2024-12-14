@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { CartsService } from './carts.service';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
 import { AuthGuard } from '../auths/auth.guard';
 import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
 
@@ -63,8 +62,8 @@ export class CartsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartsService.update(+id, updateCartDto);
+  update(@Param('id') id: string) {
+    return this.cartsService.update(+id);
   }
 
   @Delete(':id')

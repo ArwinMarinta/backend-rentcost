@@ -1,14 +1,19 @@
+import { Product } from 'src/app/products/entities/product.entity';
+import { Transaction } from 'src/app/transactions/entities/transaction.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 export enum StatusTransaction {
-  SHIPPED = 'shipped',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled',
+  DIPROSES = 'diproses',
+  DIKIRIM = 'dikirim',
+  RENTAL = 'rental',
+  DIBATALKAN = 'dibatalkan',
+  SELESAI = 'selesai',
 }
 
 @Entity()
@@ -19,21 +24,21 @@ export class TransactionItem {
   @Column({
     type: 'enum',
     enum: StatusTransaction,
-    default: StatusTransaction.SHIPPED,
+    default: StatusTransaction.DIPROSES,
   })
   status: StatusTransaction;
 
-  @Column()
+  @ManyToOne(() => Product, (product) => product.transactionItem)
+  product: Product;
+
+  @ManyToOne(() => Transaction, (item) => item.transactionItem)
+  transaction = Transaction;
+
+  @Column({ default: 1 })
   quantity: number;
 
-  @Column()
-  start_date: string;
-
-  @Column()
-  end_date: string;
-
-  @Column()
-  penalty_fee: string;
+  @Column({ default: false })
+  rating: boolean;
 
   @CreateDateColumn()
   created_at: Date;

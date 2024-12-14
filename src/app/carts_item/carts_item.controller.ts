@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { CartsItemService } from './carts_item.service';
 import { CreateCartsItemDto } from './dto/create-carts_item.dto';
-import { UpdateCartsItemDto } from './dto/update-carts_item.dto';
 import { AuthGuard } from '../auths/auth.guard';
 import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
 
@@ -44,16 +43,31 @@ export class CartsItemController {
     return this.cartsItemService.findOne(+id);
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateCartsItemDto: UpdateCartsItemDto,
-  ) {
-    return this.cartsItemService.update(+id, updateCartsItemDto);
+  async update(@Param('id') id: number, @Request() req: any) {
+    try {
+      await this.cartsItemService.update(id, req);
+
+      return {
+        message: 'Berhasil mengubah',
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartsItemService.remove(+id);
+  async remove(@Param('id') id: number, @Request() req: any) {
+    try {
+      await this.cartsItemService.remove(id, req);
+
+      return {
+        message: 'Berhasil menghapus',
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
   }
 }

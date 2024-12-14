@@ -2,6 +2,7 @@ import { CartsItem } from 'src/app/carts_item/entities/carts_item.entity';
 import { Category } from 'src/app/categories/entities/category.entity';
 import { Stock } from 'src/app/stock/entities/stock.entity';
 import { Store } from 'src/app/stores/entities/store.entity';
+import { TransactionItem } from 'src/app/transaction_items/entities/transaction_item.entity';
 import {
   Column,
   CreateDateColumn,
@@ -24,13 +25,19 @@ export class Product {
   @OneToMany(() => CartsItem, (cartItem) => cartItem.product)
   cartItem: CartsItem[];
 
+  @OneToMany(
+    () => TransactionItem,
+    (transactionItem) => transactionItem.product,
+  )
+  transactionItem: TransactionItem[];
+
   @OneToMany(() => Stock, (stock) => stock.product)
   stock: Stock[];
 
   @Column()
   product_name: string;
 
-  @Column({ default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 1, default: 0 })
   rate: number;
 
   @Column({ default: 0 })
@@ -47,6 +54,12 @@ export class Product {
 
   @Column({ default: false })
   available: boolean;
+
+  @Column({ default: 0 })
+  total_rating: number; // Menyimpan jumlah total rating
+
+  @Column({ default: 0 })
+  rating_count: number; // Menyimpan jumlah rating yang diterima
 
   @CreateDateColumn()
   created_at: Date;

@@ -16,10 +16,13 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+
 import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
 import { AuthGuard } from '../auths/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageKitService } from 'src/utils/imagekit.service';
+import { CreateDtoRating } from './dto/rating.dto';
+import { StatusDtoRating } from './dto/status.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -63,6 +66,23 @@ export class ProductsController {
     };
   }
 
+  @UseGuards(AuthGuard)
+  @Post('rating')
+  async postRating(
+    @Request() req: any,
+    @Body() createDtoRating: CreateDtoRating,
+  ) {
+    try {
+      await this.productsService.postRating(req, createDtoRating);
+
+      return {
+        message: 'Berhasil mengirim penilaian',
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
+  }
+
   @Get()
   async findAll() {
     try {
@@ -102,6 +122,20 @@ export class ProductsController {
       return {
         message: 'Get all products successfully',
         data: detail,
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('transaction')
+  async updateStatus(@Body() statusDtoRating: StatusDtoRating) {
+    try {
+      await this.productsService.updateStatus(statusDtoRating);
+
+      return {
+        message: 'status successfully update',
       };
     } catch (error) {
       createHttpException(error);

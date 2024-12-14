@@ -28,14 +28,14 @@ export class AuthsService {
     const auth = await this.findOne(createLoginDto.email);
 
     if (!auth) {
-      throw new NotFoundException('User Not Found');
+      throw new NotFoundException('Email tidak terdaftar');
     }
     const isMatch = await bcrypt.compare(
       createLoginDto.password,
       auth.password,
     );
     if (!isMatch) {
-      throw new UnauthorizedException('Wrong Password');
+      throw new UnauthorizedException('Password salah');
     }
     const payload = { auth_id: auth.id };
     const access_token = await this.jwtService.signAsync(payload, {
@@ -93,7 +93,8 @@ export class AuthsService {
             // identify_type: createAuthDto.identity_type,
             // identity_number: createAuthDto.identity_number,
             // bank_account: createAuthDto.bank_account,
-            // image_url: createAuthDto.image_url,
+            image_url:
+              'https://ik.imagekit.io/xoh0kfeiy/photo-1534528741775-53994a69daeb.webp?updatedAt=1734006901379',
             auth: newAuthId,
           })
           .execute();

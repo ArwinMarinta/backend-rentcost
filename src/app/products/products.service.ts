@@ -13,6 +13,9 @@ import { Category } from '../categories/entities/category.entity';
 import { createHttpException } from 'src/common/middlewares/utils/http-exception.util';
 import { Stock } from '../stock/entities/stock.entity';
 import { ImageKitService } from 'src/utils/imagekit.service';
+import { CreateDtoRating } from './dto/rating.dto';
+import { TransactionItem } from '../transaction_items/entities/transaction_item.entity';
+import { StatusDtoRating } from './dto/status.dto';
 
 @Injectable()
 export class ProductsService {
@@ -34,7 +37,6 @@ export class ProductsService {
     if (!user) {
       throw new NotFoundException('User not found or not authenticated');
     }
-    console.log(user.id);
 
     const store = await this.dataSource
       .getRepository(Store)
@@ -115,7 +117,9 @@ export class ProductsService {
     const queryBuilder = this.dataSource
       .getRepository(Product)
       .createQueryBuilder('product')
-      .innerJoin('product.stock', 'stock', 'stock.available = true');
+      .innerJoin('product.stock', 'stock', 'stock.available = true')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.store', 'store');
 
     if (filter && filter.includes('populer')) {
       queryBuilder.orderBy('product.rental_amount', 'DESC').limit(15);
@@ -142,7 +146,7 @@ export class ProductsService {
   async findOne(id: number) {
     const detail = await this.dataSource.getRepository(Product).findOne({
       where: { id: id },
-      relations: ['stock', 'store', 'stock.size'],
+      relations: ['stock', 'store', 'stock.size', 'category'],
       select: {
         id: true,
         product_name: true,
@@ -158,6 +162,11 @@ export class ProductsService {
           },
           stok: true,
           available: true,
+        },
+        category: {
+          category_name: true,
+          id: true,
+          image_url: true,
         },
         store: {
           id: true,
@@ -240,5 +249,70 @@ export class ProductsService {
       .getRepository(Stock)
       .delete({ product: { id: product.id } });
     await this.dataSource.getRepository(Product).delete(product.id);
+  }
+
+  async postRating(req: any, createDtoRating: CreateDtoRating) {
+    const user = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { auth: { id: req.user.auth_id } } });
+
+    if (!user) {
+      throw new NotFoundException('User not found or not authenticated');
+    }
+
+    const product = await this.dataSource
+      .getRepository(Product)
+      .findOne({ where: { id: createDtoRating.product_id } });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    // Hitung rating baru
+    const newRating = product.total_rating + createDtoRating.total_rating; // Akumulasi rating
+    const newCount = product.rating_count + 1;
+    const newRate = newRating / newCount;
+
+    await this.dataSource.transaction(async (transaction) => {
+      // Update data product
+      await transaction
+        .createQueryBuilder()
+        .update(Product)
+        .set({
+          total_rating: newRating,
+          rating_count: newCount,
+          rate: newRate,
+        })
+        .where('id = :id', { id: createDtoRating.product_id })
+        .execute();
+
+      // Update status rate pada TransactionItem
+      await transaction
+        .createQueryBuilder()
+        .update(TransactionItem)
+        .set({ rating: true }) // Set rate menjadi true
+        .where('id = :id', {
+          id: createDtoRating.transactiId,
+        })
+        .execute();
+    });
+  }
+
+  async updateStatus(statusDtoRating: StatusDtoRating) {
+    const transaction = await this.dataSource
+      .getRepository(TransactionItem)
+      .findOne({ where: { id: statusDtoRating.transaction_id } });
+    if (!transaction) {
+      throw new NotFoundException('transaction not found');
+    }
+
+    await this.dataSource
+      .createQueryBuilder()
+      .update(TransactionItem)
+      .set({
+        status: statusDtoRating.status,
+      })
+      .where('id = :id', { id: transaction.id })
+      .execute();
   }
 }
