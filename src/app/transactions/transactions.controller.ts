@@ -35,19 +35,29 @@ export class TransactionsController {
     @Body() createTransactionDto: CreateTransactionDto,
   ) {
     try {
+      console.log(createTransactionDto.productId);
+
+      console.log('test2');
+
+      const validJSONString = createTransactionDto.productId.replace(
+        /([a-zA-Z0-9_]+):/g,
+        '"$1":',
+      );
+      // Tambahkan tanda kutip untuk properti
+      const productsArray: Array<{ productId: number; sizeId: number }> =
+        JSON.parse(`[${validJSONString}]`);
+
+      console.log(productsArray);
+
+      console.log('test3');
+
       const uploadResult = await this.fileService.uploadImage(payment_image);
-
-      const productIds = createTransactionDto.productId
-        .split(',')
-        .map((id) => parseInt(id, 10));
-
-      console.log(productIds);
 
       await this.transactionsService.create(
         req,
         uploadResult.url,
         createTransactionDto,
-        productIds,
+        productsArray,
       );
 
       return {

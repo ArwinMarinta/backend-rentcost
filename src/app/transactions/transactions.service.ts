@@ -22,9 +22,9 @@ export class TransactionsService {
     req: any,
     url: string,
     createTransactionDto: CreateTransactionDto,
-    productIds: any[],
+    productsArray: Array<{ productId: number; sizeId: number }>,
   ) {
-    console.log(productIds);
+    console.log(productsArray);
     const user = await this.dataSource
       .getRepository(User)
       .findOne({ where: { auth: { id: req.user.auth_id } } });
@@ -55,9 +55,10 @@ export class TransactionsService {
 
       const transaction_id = newTransaksi.identifiers[0].id;
 
-      const transactionItems = productIds.map((productId) => ({
+      const transactionItems = productsArray.map((productId) => ({
         transaction: transaction_id,
-        product: { id: productId },
+        product: { id: productId.productId },
+        size: { id: productId.sizeId },
         quantity: 1,
       }));
 
@@ -68,11 +69,11 @@ export class TransactionsService {
         .values(transactionItems)
         .execute();
 
-      for (const productId of productIds) {
+      for (const productId of productsArray) {
         // Mengambil data stok berdasarkan productId
         const stock = await transaction
           .getRepository(Stock)
-          .findOne({ where: { product: { id: productId } } });
+          .findOne({ where: { product: { id: productId.productId } } });
 
         // Memeriksa apakah stok tidak ada atau jumlahnya kurang dari atau sama dengan 0
         if (!stock || stock.stok <= 0) {
@@ -93,13 +94,13 @@ export class TransactionsService {
           .createQueryBuilder()
           .delete()
           .from(CartsItem)
-          .where('productId = :productId', { productId })
+          .where('productId = :productId', { productId: productId.productId })
           .andWhere('cartId = :cartId', { cartId: cart.id })
           .execute();
 
         const product = await transaction
           .getRepository(Product)
-          .findOne({ where: { id: productId } });
+          .findOne({ where: { id: productId.productId } });
 
         if (!product) {
           throw new NotFoundException(`Product with ID ${productId} not found`);
@@ -153,6 +154,7 @@ export class TransactionsService {
       .createQueryBuilder('transactionItem')
       .leftJoinAndSelect('transactionItem.product', 'product')
       .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('transactionItem.size', 'size')
       .leftJoin('transactionItem.transaction', 'transaction')
       .leftJoin('transaction.user', 'user')
       .where('user.id = :userId', { userId: user.id })

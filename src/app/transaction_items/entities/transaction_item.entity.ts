@@ -1,4 +1,5 @@
 import { Product } from 'src/app/products/entities/product.entity';
+import { Size } from 'src/app/sizes/entities/size.entity';
 import { Transaction } from 'src/app/transactions/entities/transaction.entity';
 import {
   Column,
@@ -33,6 +34,9 @@ export class TransactionItem {
 
   @ManyToOne(() => Transaction, (item) => item.transactionItem)
   transaction = Transaction;
+
+  @ManyToOne(() => Size, (size) => size.transactionItem)
+  size: Size;
 
   @Column({ default: 1 })
   quantity: number;

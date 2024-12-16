@@ -62,39 +62,55 @@ export class AddressService {
     if (!user) {
       throw new NotFoundException('User not found or not authenticated');
     }
-    const exitingAddress = await this.dataSource
+
+    const existingAddress = await this.dataSource
       .getRepository(Address)
       .findOne({ where: { id: id } });
-    if (!exitingAddress) {
-      throw new NotFoundException('Address not founds');
+
+    if (!existingAddress) {
+      throw new NotFoundException('Address not found');
     }
 
-    await this.dataSource.transaction(async (address) => {
+    const existingCart = await this.dataSource
+      .getRepository(Cart)
+      .findOne({ where: { user: { id: user.id } } });
+
+    await this.dataSource.transaction(async (transactionalEntityManager) => {
       try {
-        await address
+        // Jika cart tidak ada, buat cart baru
+        let cart = existingCart;
+        if (!cart) {
+          cart = this.dataSource.getRepository(Cart).create({
+            user: { id: user.id },
+            address: { id: id }, // Atur nilai default untuk properti cart jika diperlukan
+          });
+          await transactionalEntityManager.save(Cart, cart);
+        }
+
+        // Update address yang digunakan
+        await transactionalEntityManager
           .createQueryBuilder()
           .update(Address)
           .set({ used: true })
           .where('id = :id', { id })
           .execute();
 
-        await address
+        await transactionalEntityManager
           .createQueryBuilder()
           .update(Address)
           .set({ used: false })
           .where('id != :id', { id })
           .execute();
 
-        await address
+        // Update address pada cart
+        await transactionalEntityManager
           .createQueryBuilder()
           .update(Cart)
-          .set({
-            address: exitingAddress.id,
-          })
-          .where('userId = :userId', { userId: user.id }) // Adjust to your logic
+          .set({ address: existingAddress.id })
+          .where('userId = :userId', { userId: user.id })
           .execute();
       } catch (error) {
-        createHttpException(error);
+        throw createHttpException(error);
       }
     });
   }
