@@ -16,6 +16,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPasswordRequestDto } from './dto/reset-password-request.dto';
 import { ConfirmPasswordDto } from './dto/confirm-password';
 import { ChangePasswordDto } from './dto/change-passoword';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Injectable()
 export class AuthsService {
@@ -194,5 +195,24 @@ export class AuthsService {
       .set({ password: await bcrypt.hash(changePassword.NewPassword, 10) })
       .where('id = :id', { id: auth.id })
       .execute();
+  }
+
+  async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<string> {
+    const decoded = this.jwtService.decode(refreshTokenDto.access_token);
+
+    const auth = await this.dataSource
+      .getRepository(Auth)
+      .findOne({ where: { id: decoded.auth_id } });
+
+    if (!auth) {
+      throw new NotFoundException('User not found');
+    }
+    const payload = { auth_id: auth.id };
+
+    const access_token = await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_SECRET,
+    });
+
+    return access_token;
   }
 }

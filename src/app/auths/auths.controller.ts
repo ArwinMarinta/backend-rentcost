@@ -16,6 +16,7 @@ import { ConfirmPasswordDto } from './dto/confirm-password';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { AuthGuard } from './auth.guard';
 import { ChangePasswordDto } from './dto/change-passoword';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Controller('auth')
 export class AuthsController {
@@ -46,6 +47,7 @@ export class AuthsController {
       createHttpException(error);
     }
   }
+
   @Post('/reset-password')
   async resetPassword(
     @Body(new ValidationPipe()) resetPasswordDto: ResetPasswordRequestDto,
@@ -83,6 +85,21 @@ export class AuthsController {
       await this.authsService.changePassword(changePasswordDto, req);
       return {
         message: 'Berhasil Mengubah password',
+      };
+    } catch (error) {
+      createHttpException(error);
+    }
+  }
+
+  @Post('/refresh-token')
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    try {
+      console.log('refres');
+      const token = await this.authsService.refreshToken(refreshTokenDto);
+
+      return {
+        message: 'Berhasil refresh token',
+        data: token,
       };
     } catch (error) {
       createHttpException(error);
